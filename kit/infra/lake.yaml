@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Saica DAT - lake privado, cifrado, versionado, Glue Catalog y Athena limitado.
+Parameters:
+  LakeName: {Type: String, AllowedPattern: '[a-z0-9][a-z0-9-]{3,60}[a-z0-9]'}
+  ResultsName: {Type: String, AllowedPattern: '[a-z0-9][a-z0-9-]{3,60}[a-z0-9]'}
+  CatalogName: {Type: String, Default: saica_g03, AllowedPattern: '[a-z][a-z0-9_]{2,50}'}
+Resources:
+  Lake:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Ref LakeName
+      VersioningConfiguration: {Status: Enabled}
+      BucketEncryption: {ServerSideEncryptionConfiguration: [{ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}}]}
+      PublicAccessBlockConfiguration: {BlockPublicAcls: true, IgnorePublicAcls: true, BlockPublicPolicy: true, RestrictPublicBuckets: true}
+      Tags: [{Key: project, Value: saica-dat}]
+  Results:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Ref ResultsName
+      BucketEncryption: {ServerSideEncryptionConfiguration: [{ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}}]}
+      PublicAccessBlockConfiguration: {BlockPublicAcls: true, IgnorePublicAcls: true, BlockPublicPolicy: true, RestrictPublicBuckets: true}
+      LifecycleConfiguration: {Rules: [{Id: resultado-temporal, Status: Enabled, Prefix: athena/, ExpirationInDays: 7}]}
+  SecureLake:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref Lake
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource: [!GetAtt Lake.Arn, !Sub '${Lake.Arn}/*']
+            Condition: {Bool: {'aws:SecureTransport': 'false'}}
+  SecureResults:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref Results
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource: [!GetAtt Results.Arn, !Sub '${Results.Arn}/*']
+            Condition: {Bool: {'aws:SecureTransport': 'false'}}
+  Catalog:
+    Type: AWS::Glue::Database
+    Properties: {CatalogId: !Ref 'AWS::AccountId', DatabaseInput: {Name: !Ref CatalogName}}
+  Workgroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: !Sub '${CatalogName}-wg'
+      WorkGroupConfiguration:
+        EnforceWorkGroupConfiguration: true
+        PublishCloudWatchMetricsEnabled: true
+        BytesScannedCutoffPerQuery: 10485760
+        ResultConfiguration:
+          OutputLocation: !Sub 's3://${Results}/athena/'
+          EncryptionConfiguration: {EncryptionOption: SSE_S3}
+Outputs:
+  Lake: {Value: !Ref Lake}
+  Results: {Value: !Ref Results}
+  Catalog: {Value: !Ref Catalog}
+  Workgroup: {Value: !Ref Workgroup}

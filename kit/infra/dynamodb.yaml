@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Saica DAT - eventos por lote, cifrado, PITR y TTL.
+Parameters:
+  TableName: {Type: String, AllowedPattern: '[a-zA-Z0-9_.-]{3,100}'}
+Resources:
+  Events:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Ref TableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{AttributeName: PK, AttributeType: S}, {AttributeName: SK, AttributeType: S}]
+      KeySchema: [{AttributeName: PK, KeyType: HASH}, {AttributeName: SK, KeyType: RANGE}]
+      SSESpecification: {SSEEnabled: true, SSEType: KMS}
+      PointInTimeRecoverySpecification: {PointInTimeRecoveryEnabled: true}
+      TimeToLiveSpecification: {AttributeName: expires_at, Enabled: true}
+      Tags: [{Key: project, Value: saica-dat}]
+Outputs:
+  Name: {Value: !Ref Events}
+  Arn: {Value: !GetAtt Events.Arn}

@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Saica DAT - PostgreSQL privado cifrado. Dependencias de red externas.
+Parameters:
+  VpcId: {Type: AWS::EC2::VPC::Id}
+  PrivateSubnets: {Type: 'List<AWS::EC2::Subnet::Id>'}
+  ClientSecurityGroup: {Type: AWS::EC2::SecurityGroup::Id}
+  EngineVersion: {Type: String, Description: Version de PostgreSQL validada en la region}
+  ParameterFamily: {Type: String, Description: Familia compatible, por ejemplo postgres17 si la version es 17.x}
+  InstanceClass: {Type: String, Default: db.t3.micro}
+  MultiAZ: {Type: String, Default: 'false', AllowedValues: ['true','false']}
+  KmsKeyId: {Type: String, Default: '', Description: Clave regional autorizada; vacio utiliza clave administrada del servicio}
+Conditions:
+  WithKms: !Not [!Equals [!Ref KmsKeyId, '']]
+  WithMultiAZ: !Equals [!Ref MultiAZ, 'true']
+Resources:
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Dos subredes privadas en AZ diferentes
+      SubnetIds: !Ref PrivateSubnets
+  DbSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VpcId
+      GroupDescription: PostgreSQL solo desde el cliente DAT autorizado
+      SecurityGroupIngress:
+        - {IpProtocol: tcp, FromPort: 5432, ToPort: 5432, SourceSecurityGroupId: !Ref ClientSecurityGroup}
+  Parameters:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: TLS obligatorio y consultas lentas del laboratorio
+      Family: !Ref ParameterFamily
+      Parameters:
+        rds.force_ssl: '1'
+        log_min_duration_statement: '500'
+  Database:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      Engine: postgres
+      EngineVersion: !Ref EngineVersion
+      DBInstanceClass: !Ref InstanceClass
+      AllocatedStorage: '20'
+      StorageType: gp3
+      StorageEncrypted: true
+      KmsKeyId: !If [WithKms, !Ref KmsKeyId, !Ref 'AWS::NoValue']
+      MasterUsername: saica_admin
+      ManageMasterUserPassword: true
+      DBName: saica
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      VPCSecurityGroups: [!Ref DbSG]
+      DBParameterGroupName: !Ref Parameters
+      PubliclyAccessible: false
+      MultiAZ: !If [WithMultiAZ, true, false]
+      BackupRetentionPeriod: 1
+      EnableCloudwatchLogsExports: [postgresql]
+      CopyTagsToSnapshot: true
+      Tags: [{Key: project, Value: saica-dat}, {Key: owner, Value: docente-laboratorio}]
+Outputs:
+  DbId: {Value: !Ref Database}
+  Endpoint: {Value: !GetAtt Database.Endpoint.Address}
+  DbSecurityGroup: {Value: !Ref DbSG}
+  SecretArn: {Value: !GetAtt Database.MasterUserSecret.SecretArn}

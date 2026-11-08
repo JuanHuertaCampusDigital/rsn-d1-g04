@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  RoleArn: {Type: String, Description: Rol Glue con lectura raw/scripts y escritura stage del bucket del equipo}
+  ScriptLocation: {Type: String, Description: URI s3 del script etl_job.py}
+  JobName: {Type: String}
+Resources:
+  Job:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Ref JobName
+      Role: !Ref RoleArn
+      Command: {Name: pythonshell, PythonVersion: '3.9', ScriptLocation: !Ref ScriptLocation}
+      MaxCapacity: 0.0625
+      Timeout: 10
+      MaxRetries: 0
+      ExecutionProperty: {MaxConcurrentRuns: 1}
+Outputs: {Name: {Value: !Ref Job}}

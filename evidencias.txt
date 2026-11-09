@@ -1,1 +1,240 @@
+~ $ aws s3api create-bucket --bucket juan-grupo-d02-rsn --region us-east-1
+{
+    "Location": "/juan-grupo-d02-rsn",
+    "BucketArn": "arn:aws:s3:::juan-grupo-d02-rsn"
+}
+~ $ aws s3api put-public-access-block \
+>   --bucket juan-grupo-d02-rsn \
+>   --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
+~ $ aws s3api put-bucket-versioning \
+>   --bucket juan-grupo-d02-rsn \
+>   --versioning-configuration Status=Enabled
+~ $ echo "Imagen de calidad v1 - OK" > foto_calidad.txt
+~ $ aws s3 cp foto_calidad.txt s3://juan-grupo-d02-rsn/foto_calidad.txt
+upload: ./foto_calidad.txt to s3://juan-grupo-d02-rsn/foto_calidad.txt
+~ $ aws s3 cp s3://juan-grupo-d02-rsn/foto_calidad.txt prueba_publica.txt --no-sign-request
+fatal error: An error occurred (403) when calling the HeadObject operation: Forbidden
+~ $ echo "Imagen de calidad v2 - MODIFICADA" > foto_calidad.txt
+~ $ aws s3 cp foto_calidad.txt s3://juan-grupo-d02-rsn/foto_calidad.txt
+upload: ./foto_calidad.txt to s3://juan-grupo-d02-rsn/foto_calidad.txt
+~ $ aws s3api list-object-versions --bucket juan-grupo-d02-rsn --prefix foto_calidad.txt
+{
+    "Versions": [
+        {
+            "ETag": "\"c1ce7707453803307d52d29fd7a22048\"",
+            "ChecksumAlgorithm": [
+                "CRC64NVME"
+            ],
+            "ChecksumType": "FULL_OBJECT",
+            "Size": 34,
+            "StorageClass": "STANDARD",
+            "Key": "foto_calidad.txt",
+            "VersionId": "vZKnuUDqf7KeHk3BEC5pvIYueVZcwToY",
+            "IsLatest": true,
+            "LastModified": "2026-11-09T22:24:48+00:00",
+            "Owner": {
+                "ID": "8cd13ff12257ff1230f59895f3402b2601d286891b086a7f61d30c6d3020c111"
+            }
+        },
+        {
+            "ETag": "\"72727162492eb55de6668deb56584934\"",
+            "ChecksumAlgorithm": [
+                "CRC64NVME"
+            ],
+            "ChecksumType": "FULL_OBJECT",
+            "Size": 26,
+            "StorageClass": "STANDARD",
+            "Key": "foto_calidad.txt",
+            "VersionId": "aNfl1dKKDF2m1LwpjVZmcgPzfK7wMsHq",
+            "IsLatest": false,
+            "LastModified": "2026-11-09T22:22:15+00:00",
+            "Owner": {
+                "ID": "8cd13ff12257ff1230f59895f3402b2601d286891b086a7f61d30c6d3020c111"
+            }
+        }
+    ],
+    "RequestCharged": null,
+    "Prefix": "foto_calidad.txt"
+}
+...skipping...
+{
+    "Versions": [
+        {
+            "ETag": "\"c1ce7707453803307d52d29fd7a22048\"",
+            "ChecksumAlgorithm": [
+                "CRC64NVME"
+            ],
+            "ChecksumType": "FULL_OBJECT",
+            "Size": 34,
+            "StorageClass": "STANDARD",
+            "Key": "foto_calidad.txt",
+            "VersionId": "vZKnuUDqf7KeHk3BEC5pvIYueVZcwToY",
+            "IsLatest": true,
+            "LastModified": "2026-11-09T22:24:48+00:00",
+            "Owner": {
+                "ID": "8cd13ff12257ff1230f59895f3402b2601d286891b086a7f61d30c6d3020c111"
+            }
+        },
+        {
+            "ETag": "\"72727162492eb55de6668deb56584934\"",
+            "ChecksumAlgorithm": [
+                "CRC64NVME"
+            ],
+            "ChecksumType": "FULL_OBJECT",
+            "Size": 26,
+            "StorageClass": "STANDARD",
+            "Key": "foto_calidad.txt",
+            "VersionId": "aNfl1dKKDF2m1LwpjVZmcgPzfK7wMsHq",
+            "IsLatest": false,
+            "LastModified": "2026-11-09T22:22:15+00:00",
+            "Owner": {
+                "ID": "8cd13ff12257ff1230f59895f3402b2601d286891b086a7f61d30c6d3020c111"
+            }
+        }
+    ],
+    "RequestCharged": null,
+    "Prefix": "foto_calidad.txt"
+}
+...skipping...
+{
+    "Versions": [
+        {
+            "ETag": "\"c1ce7707453803307d52d29fd7a22048\"",
+            "ChecksumAlgorithm": [
+                "CRC64NVME"
+            ],
+            "ChecksumType": "FULL_OBJECT",
+            "Size": 34,
+            "StorageClass": "STANDARD",
+            "Key": "foto_calidad.txt",
+            "VersionId": "vZKnuUDqf7KeHk3BEC5pvIYueVZcwToY",
+            "IsLatest": true,
+            "LastModified": "2026-11-09T22:24:48+00:00",
+            "Owner": {
+                "ID": "8cd13ff12257ff1230f59895f3402b2601d286891b086a7f61d30c6d3020c111"
+            }
+        },
+        {
+            "ETag": "\"72727162492eb55de6668deb56584934\"",
+            "ChecksumAlgorithm": [
+                "CRC64NVME"
+            ],
+            "ChecksumType": "FULL_OBJECT",
+            "Size": 26,
+            "StorageClass": "STANDARD",
+            "Key": "foto_calidad.txt",
+            "VersionId": "aNfl1dKKDF2m1LwpjVZmcgPzfK7wMsHq",
+            "IsLatest": false,
+            "LastModified": "2026-11-09T22:22:15+00:00",
+            "Owner": {
+                "ID": "8cd13ff12257ff1230f59895f3402b2601d286891b086a7f61d30c6d3020c111"
+            }
+        }
+    ],
+    "RequestCharged": null,
+    "Prefix": "foto_calidad.txt"
+}
+...skipping...
+{
+    "Versions": [
+        {
+            "ETag": "\"c1ce7707453803307d52d29fd7a22048\"",
+            "ChecksumAlgorithm": [
+                "CRC64NVME"
+            ],
+            "ChecksumType": "FULL_OBJECT",
+            "Size": 34,
+            "StorageClass": "STANDARD",
+            "Key": "foto_calidad.txt",
+            "VersionId": "vZKnuUDqf7KeHk3BEC5pvIYueVZcwToY",
+            "IsLatest": true,
+            "LastModified": "2026-11-09T22:24:48+00:00",
+            "Owner": {
+                "ID": "8cd13ff12257ff1230f59895f3402b2601d286891b086a7f61d30c6d3020c111"
+            }
+        },
+        {
+            "ETag": "\"72727162492eb55de6668deb56584934\"",
+            "ChecksumAlgorithm": [
+                "CRC64NVME"
+            ],
+            "ChecksumType": "FULL_OBJECT",
+            "Size": 26,
+            "StorageClass": "STANDARD",
+            "Key": "foto_calidad.txt",
+            "VersionId": "aNfl1dKKDF2m1LwpjVZmcgPzfK7wMsHq",
+            "IsLatest": false,
+            "LastModified": "2026-11-09T22:22:15+00:00",
+            "Owner": {
+                "ID": "8cd13ff12257ff1230f59895f3402b2601d286891b086a7f61d30c6d3020c111"
+            }
+        }
+    ],
+    "RequestCharged": null,
+    "Prefix": "foto_calidad.txt"
+}
+...skipping...
+{
+    "Versions": [
+        {
+            "ETag": "\"c1ce7707453803307d52d29fd7a22048\"",
+            "ChecksumAlgorithm": [
+                "CRC64NVME"
+            ],
+            "ChecksumType": "FULL_OBJECT",
+            "Size": 34,
+            "StorageClass": "STANDARD",
+            "Key": "foto_calidad.txt",
+            "VersionId": "vZKnuUDqf7KeHk3BEC5pvIYueVZcwToY",
+            "IsLatest": true,
+            "LastModified": "2026-11-09T22:24:48+00:00",
+            "Owner": {
+                "ID": "8cd13ff12257ff1230f59895f3402b2601d286891b086a7f61d30c6d3020c111"
+            }
+        },
+        {
+            "ETag": "\"72727162492eb55de6668deb56584934\"",
+            "ChecksumAlgorithm": [
+                "CRC64NVME"
+            ],
+            "ChecksumType": "FULL_OBJECT",
+            "Size": 26,
+            "StorageClass": "STANDARD",
+            "Key": "foto_calidad.txt",
+            "VersionId": "aNfl1dKKDF2m1LwpjVZmcgPzfK7wMsHq",
+            "IsLatest": false,
+            "LastModified": "2026-11-09T22:22:15+00:00",
+            "Owner": {
+                "ID": "8cd13ff12257ff1230f59895f3402b2601d286891b086a7f61d30c6d3020c111"
+            }
+        }
+    ],
+    "RequestCharged": null,
+    "Prefix": "foto_calidad.txt"
+}
+~ $ aws s3api get-object --bucket juan-grupo-d02-rsn --key foto_calidad.txt --version-id aNf1ldKKDF2m1LwpjVZmcgPzfK7wMsHq recuperado_v1.txt
 
+aws: [ERROR]: An error occurred (NoSuchVersion) when calling the GetObject operation: The specified version does not exist.
+~ $ aws s3api get-object --bucket juan-grupo-d02-rsn --key foto_calidad.txt --version-id "aNf1ldKKDF2m1LwpjVZmcgPzfK7wMsHq" recuperado_v1.txt
+
+aws: [ERROR]: An error occurred (NoSuchVersion) when calling the GetObject operation: The specified version does not exist.
+~ $ VID=$(aws s3api list-object-versions --bucket juan-grupo-d02-rsn --prefix foto_calidad.txt --query "Versions[?IsLatest==\`false\`].VersionId" --output text)
+
+~ $ echo "El VersionId antiguo detectado es: $VID"
+El VersionId antiguo detectado es: aNfl1dKKDF2m1LwpjVZmcgPzfK7wMsHq
+~ $ aws s3api get-object --bucket juan-grupo-d02-rsn --key foto_calidad.txt --version-id "$VID" recuperado_v1.txt
+{
+    "AcceptRanges": "bytes",
+    "LastModified": "2026-11-09T22:22:15+00:00",
+    "ContentLength": 26,
+    "ETag": "\"72727162492eb55de6668deb56584934\"",
+    "ChecksumCRC64NVME": "2NgDqIHDV9w=",
+    "ChecksumType": "FULL_OBJECT",
+    "VersionId": "aNfl1dKKDF2m1LwpjVZmcgPzfK7wMsHq",
+    "ContentType": "text/plain",
+    "ServerSideEncryption": "AES256",
+    "Metadata": {}
+}
+~ $ cat recuperado_v1.txt
+Imagen de calidad v1 - OK
+~ $ 

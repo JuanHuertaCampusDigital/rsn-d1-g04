@@ -1,3 +1,9 @@
+==================================================
+EVIDENCIAS DE CONFIGURACIÓN Y PRUEBAS EN AWS S3
+Persona 2: Juan Huerta García (Operador AWS)
+Bucket: juan-grupo-d02-rsn
+==================================================
+
 ~ $ aws s3api create-bucket --bucket juan-grupo-d02-rsn --region us-east-1
 {
     "Location": "/juan-grupo-d02-rsn",
